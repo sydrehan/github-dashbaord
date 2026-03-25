@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GitHub Analytics Dashboard (Next.js App Router)
 
-## Getting Started
+A scalable GitHub analytics dashboard using Next.js App Router + TypeScript + Tailwind + Recharts. No separate backend; token is handled in short-lived HTTP-only cookies.
 
-First, run the development server:
+## Features
+
+- Login with GitHub username + Personal Access Token (PAT)
+- Server Components + Server Actions for secure data fetch
+- GitHub REST + GraphQL data: profile, repos, PRs, issues, contributions
+- Repository analytics (stars, forks, language distribution)
+- Contribution heatmap + streak + activity insights
+- Responsive UI + dark mode
+
+## Folder structure
+
+- `app/page.tsx`: login page and auth action
+- `app/dashboard/page.tsx`: analytics dashboard
+- `components/analytics/*`: chart components (Recharts)
+- `lib/github.ts`: GitHub API helper functions
+- `lib/utils.ts`: date formatting utilities
+
+## Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Authenticate
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Generate a GitHub PAT with these scopes (minimum):
 
-## Learn More
+- `read:user`
+- `repo` (or `public_repo` if only public repositories)
 
-To learn more about Next.js, take a look at the following resources:
+Enter your username + PAT at `/`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Production
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run build
+npm start
+```
 
-## Deploy on Vercel
+## Validate
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `npm run lint`
+- `npm run build`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Optional env
+
+No GitHub token is stored in `.env.local` by default; you still can define app constants:
+
+```env
+NEXT_PUBLIC_APP_NAME="GitHub Analytics Dashboard"
+```
+
+## Notes
+
+- Token is never exposed to client script
+- Token cookie expiry is 10 minutes
+- Rate limit checks available via GitHub API
+
