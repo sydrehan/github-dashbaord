@@ -64,12 +64,14 @@ export type UserProfile = {
 export type RepoItem = {
   id: number;
   name: string;
+  owner: { login: string };
   html_url: string;
   stargazers_count: number;
   forks_count: number;
   language: string | null;
   description: string | null;
   updated_at: string;
+  private: boolean;
 };
 
 export type PullRequestStats = {
@@ -688,3 +690,58 @@ export function buildActivityTimeline(events: UserEvent[]): ActivityEvent[] {
   }));
 }
 
+export const getRepoDetailCommits = cache(async (token: string, owner: string, repo: string): Promise<any[]> => {
+  try {
+    return await ghRest<any[]>(`/repos/${owner}/${repo}/commits?per_page=100`, token);
+  } catch { return []; }
+});
+
+export const getRepoDetailCommitStats = cache(async (token: string, owner: string, repo: string, sha: string): Promise<any> => {
+  try {
+    return await ghRest<any>(`/repos/${owner}/${repo}/commits/${sha}`, token);
+  } catch { return null; }
+});
+
+export const getRepoDetailPRs = cache(async (token: string, owner: string, repo: string): Promise<any[]> => {
+  try {
+    return await ghRest<any[]>(`/repos/${owner}/${repo}/pulls?state=all&per_page=100`, token);
+  } catch { return []; }
+});
+
+export const getRepoDetailIssues = cache(async (token: string, owner: string, repo: string): Promise<any[]> => {
+  try {
+    return await ghRest<any[]>(`/repos/${owner}/${repo}/issues?state=all&per_page=100`, token);
+  } catch { return []; }
+});
+
+export const getRepoDetailPRReviews = cache(async (token: string, owner: string, repo: string, prNumber: number): Promise<any[]> => {
+  try {
+    return await ghRest<any[]>(`/repos/${owner}/${repo}/pulls/${prNumber}/reviews`, token);
+  } catch { return []; }
+});
+
+export const getRepoDetailEvents = cache(async (token: string, owner: string, repo: string): Promise<any[]> => {
+  try {
+    return await ghRest<any[]>(`/repos/${owner}/${repo}/events?per_page=100`, token);
+  } catch { return []; }
+});
+
+export const getRepoDetailContributorsStats = cache(async (token: string, owner: string, repo: string): Promise<any[]> => {
+  for (let i = 0; i < 3; i++) {
+    try {
+      const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/stats/contributors`, {
+        headers: {
+          Accept: "application/vnd.github+json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (res.status === 202) {
+        await new Promise(r => setTimeout(r, 1000));
+        continue;
+      }
+      if (!res.ok) return [];
+      return await res.json();
+    } catch { return []; }
+  }
+  return [];
+});
